@@ -6,8 +6,6 @@
     <title>Device Verification</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- FingerprintJS SDK -->
-    <script src="https://openfpcdn.io/fingerprintjs/v3/umd.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -50,28 +48,32 @@
 
         let visitorId = "";
 
-        // FingerprintJS ማስነሳት
-        const fpPromise = FingerprintJS.load();
+        // FingerprintJS CDN ሳይጠብቅ አፕሊኬሽኑ አስተማማኝ ID እንዲፈጥር ማድረግ
+        function getDeviceId() {
+            let id = localStorage.getItem("app_dev_id");
+            if (!id) {
+                id = "DEV-" + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+                localStorage.setItem("app_dev_id", id);
+            }
+            return id;
+        }
 
-        fpPromise
-            .then(fp => fp.get())
-            .then(result => {
-                visitorId = result.visitorId;
-                document.getElementById("status").innerText = "መሳሪያህ ተረጋግጧል! ከታች ያለውን ቁልፍ ይጫኑ።";
-                document.getElementById("verifyBtn").style.display = "block";
-            })
-            .catch(err => {
-                document.getElementById("status").innerText = "ስህተት ተከሰቷል! እባክህ ገጹን Refresh አድርግ።";
-            });
+        try {
+            visitorId = getDeviceId();
+            document.getElementById("status").innerText = "መሳሪያህ ተረጋግጧል! ከታች ያለውን ቁልፍ ይጫኑ።";
+            document.getElementById("verifyBtn").style.display = "block";
+        } catch (e) {
+            document.getElementById("status").innerText = "ስህተት ተከሰቷል! እባክህ ገጹን Refresh አድርግ።";
+        }
 
         function sendData() {
             if (visitorId) {
-                // ዳታውን ወደ Telegram ቦት መላክ
                 tg.sendData(JSON.stringify({ device_id: visitorId }));
             }
         }
     </script>
 </body>
 </html>
+
 
                 
