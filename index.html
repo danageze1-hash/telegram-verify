@@ -1,57 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device Verification</title>
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <!-- FingerprintJS SDK -->
+    <script src="https://openfpcdn.io/fingerprintjs/v3/umd.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: sans-serif;
+            background-color: #1c1c1d;
+            color: white;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #1a1a1a;
-            color: white;
             text-align: center;
         }
-        .btn {
-            background-color: #24a1de;
+        h2 { margin-bottom: 10px; }
+        p { color: #aaaaaa; font-size: 14px; margin-bottom: 25px; }
+        button {
+            background-color: #0088cc;
             color: white;
             border: none;
             padding: 12px 24px;
             font-size: 16px;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
+            display: none;
         }
+        button:active { background-color: #006699; }
     </style>
 </head>
 <body>
-    <h2>የመሣሪያ ማረጋገጫ (Device Verification)</h2>
-    <p id="status">እባክዎ የመሣሪያዎን አሻራ እስምናረጋግጥ ትንሽ ይጠብቁ...</p>
-    <button class="btn" id="verifyBtn" style="display:none;" onclick="sendData()">ወደ ቦት ተመለስ</button>
+
+    <h2>የመሳሪያ ማረጋገጫ (Device Verification)</h2>
+    <p id="status">መረጃው በመሰብሰብ ላይ ነው... እባክህ ትንሽ ጠብቅ።</p>
+    
+    <button id="verifyBtn" onclick="sendData()">ወደ ቦት ተመለስ</button>
 
     <script>
-        let visitorId = "";
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
-        FingerprintJS.load().then(fp => {
-            fp.get().then(result => {
+        let visitorId = "";
+
+        // FingerprintJS ማስነሳት
+        const fpPromise = FingerprintJS.load();
+
+        fpPromise
+            .then(fp => fp.get())
+            .then(result => {
                 visitorId = result.visitorId;
-                document.getElementById("status").innerText = "መሣሪያዎ ተረጋግጧል! ከታች ያለውን ቁልፍ ይጫኑ።";
+                document.getElementById("status").innerText = "መሳሪያህ ተረጋግጧል! ከታች ያለውን ቁልፍ ይጫኑ።";
                 document.getElementById("verifyBtn").style.display = "block";
+            })
+            .catch(err => {
+                document.getElementById("status").innerText = "ስህተት ተከሰቷል! እባክህ ገጹን Refresh አድርግ።";
             });
-        });
 
         function sendData() {
-            tg.sendData(JSON.stringify({ device_id: visitorId }));
+            if (visitorId) {
+                // ዳታውን ወደ Telegram ቦት መላክ
+                tg.sendData(JSON.stringify({ device_id: visitorId }));
+            }
         }
     </script>
 </body>
 </html>
+
+                
